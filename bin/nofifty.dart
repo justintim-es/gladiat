@@ -326,6 +326,9 @@ void main(List<String> arguments) async {
     app.get('/liber-transaction-stagnum', (Request request) async {
        return Response.ok(json.encode(p2p.liberTxs.map((e) => e.toJson()).toList()));
     });
+    app.get('/fixum-transaction-stagnum', (Request reuest) async {
+      return Response.ok(json.encode(p2p.fixumTxs.map((e) => e.toJson()).toList()));
+    });
     app.get('/expressi-transaction-stagnum', (Request request) async {
       return Response.ok(json.encode(p2p.expressieTxs.map((e) => e.toJson()).toList()));
     });
