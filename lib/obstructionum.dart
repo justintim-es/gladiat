@@ -321,10 +321,10 @@ class Obstructionum {
     }
     return obs;
   }
-  static Future<bool> gladiatorSpiritus(String gladiatorId, Directory dir) async {
+  static Future<bool> gladiatorSpiritus(int index, String gladiatorId, Directory dir) async {
       List<Obstructionum> obs = await getBlocks(dir);
-      List<String> ids = obs.map((o) => o.interioreObstructionum.gladiator.input?.gladiatorId ?? "").toList();
-      if (ids.contains(gladiatorId)) {
+      List<GladiatorInput?> gis = obs.map((o) => o.interioreObstructionum.gladiator.input).toList();
+      if (gis.any((g) => g?.gladiatorId == gladiatorId && g?.index == index)) {
         return false;
       }
       return true;

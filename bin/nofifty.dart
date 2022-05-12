@@ -633,7 +633,7 @@ void main(List<String> arguments) async {
       Confussus conf = Confussus.fromJson(json.decode(await request.readAsString()));
       Obstructionum priorObstructionum = await Utils.priorObstructionum(principalisDirectory);
       Gladiator gladiatorToAttack = await Obstructionum.grabGladiator(conf.gladiatorId, principalisDirectory);
-      if (!await Obstructionum.gladiatorSpiritus(gladiatorToAttack.id, principalisDirectory)) {
+      if (!await Obstructionum.gladiatorSpiritus(conf.index, gladiatorToAttack.id, principalisDirectory)) {
         return Response.forbidden(json.encode({
           "code": 0,
           "message": "Gladiator non inveni",
