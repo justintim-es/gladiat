@@ -506,7 +506,7 @@ void main(List<String> arguments) async {
             p2p.syncBlocks.add(await Isolate.spawn(P2P.syncBlock, List<dynamic>.from([obstructionum, p2p.sockets, principalisDirectory])));
             await obstructionum.salvare(principalisDirectory);
             p2p.expressieTxs = [];
-            // p2p.efectusRp.sendPort.send("update miner");
+            p2p.efectusRp.sendPort.send("update miner");
             if (p2p.isConfussusActive) {
               p2p.confussusRp.sendPort.send('update miner');
             }
