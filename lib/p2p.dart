@@ -162,7 +162,7 @@ class RequestObstructionumProbationemP2PMessage extends P2PMessage {
     probationem = jsoschon['probationem'],
     super.fromJson(jsoschon);
   @override
-  Map<String, dynamic>  toJson() => {
+  Map<String, dynamic> toJson() => {
     'index': index,
     'probationem': probationem,
     'type': type
@@ -201,8 +201,12 @@ class P2P {
   P2P(this.maxPeers, this.dir, this.summaNumerus);
   listen(String internalIp, int port) async {
     ServerSocket serverSocket = await ServerSocket.bind(internalIp, port);
+    print(serverSocket.address);
+    print(serverSocket.port);
     serverSocket.listen((client) {
       client.listen((data) async {
+        print(client.address.address);
+        print(client.port);
         P2PMessage msg = P2PMessage.fromJson(json.decode(String.fromCharCodes(data).trim()));
         if(msg.type == 'connect-bootnode') {
           ConnectBootnodeP2PMessage cbp2pm = ConnectBootnodeP2PMessage.fromJson(json.decode(String.fromCharCodes(data).trim()));
@@ -273,8 +277,7 @@ class P2P {
           ObstructionumP2PMessage op2pm = ObstructionumP2PMessage.fromJson(json.decode(String.fromCharCodes(data).trim()));
           if (dir.listSync().isEmpty && op2pm.obstructionum.interioreObstructionum.generare == Generare.INCIPIO) {
             await op2pm.obstructionum.salvareIncipio(dir);
-            summaNumerus = [1];
-            client.write(json.encode(RequestObstructionumP2PMessage(summaNumerus, 'request-obstructionum').toJson()));
+            client.write(json.encode(RequestObstructionumP2PMessage([1], 'request-obstructionum').toJson()));
           } else if (dir.listSync().isEmpty && op2pm.obstructionum.interioreObstructionum.generare != Generare.INCIPIO) {
               client.write(json.encode(RequestObstructionumP2PMessage([0], 'request-obstructionum').toJson()));
           } else {
@@ -296,8 +299,8 @@ class P2P {
                 }
                 List<Transaction> transformInputs = [];
                 for (Transaction tx in op2pm.obstructionum.interioreObstructionum.fixumTransactions) {
-                  if (tx.probationem == 'transform') {
                     transformInputs.add(tx);
+                  if (tx.probationem == 'transform') {
                   } else {
                     if (!await tx.validateFixum(dir) || !tx.validateProbationem()) {
                       print("Corrumpere negotium in obstructionum");
@@ -384,6 +387,12 @@ class P2P {
                   if (op2pm.obstructionum.interioreObstructionum.gladiator.outputs.isNotEmpty) {
                     print("outputs arent liceat ad confossum");
                     return;
+                  } else if (
+                    await Obstructionum.gladiatorConfodiantur(op2pm.obstructionum.interioreObstructionum.gladiator.input!.gladiatorId, op2pm.obstructionum.interioreObstructionum.producentis, dir)
+                  ) {
+                    print('clausus potest non oppugnare publica clavem');
+                    print("block can't attack the same public key");
+                    return;
                   }
                   Defensio turpiaDefensio = await Pera.turpiaGladiatoriaDefensione(index, gladiatorId, dir);
                   List<Defensio> deschefLiber = await Pera.maximeDefensiones(true, index, gladiatorId, dir);
@@ -424,21 +433,97 @@ class P2P {
                     print("Insufficiens transforms");
                     return;
                   }
+                  Obstructionum utCognoscereObstructionum = obss.singleWhere((o) => o.interioreObstructionum.gladiator.id == op2pm.obstructionum.interioreObstructionum.gladiator.input!.gladiatorId);
+                  GladiatorOutput utCognoscere = utCognoscereObstructionum.interioreObstructionum.gladiator.outputs[op2pm.obstructionum.interioreObstructionum.gladiator.input!.index];
+                  if(
+                    !Utils.cognoscereVictusGladiator(
+                      PublicKey.fromHex(Pera.curve(), op2pm.obstructionum.interioreObstructionum.producentis), 
+                      Signature.fromASN1Hex(op2pm.obstructionum.interioreObstructionum.gladiator.input!.signature), 
+                      utCognoscere
+                    )) {
+                      print('invalidum confossus gladiator');
+                      print('invalid stabbed gladiator');
+                    }
                 } else if (op2pm.obstructionum.interioreObstructionum.generare == Generare.EXPRESSI) {
-                  expressiRp.sendPort.send(false);
-
+                  expressiRp.sendPort.send(false);                  
+                  String gladiatorId = op2pm.obstructionum.interioreObstructionum.gladiator.input!.gladiatorId;
+                  int index = op2pm.obstructionum.interioreObstructionum.gladiator.input!.index;
+                  if (op2pm.obstructionum.interioreObstructionum.gladiator.outputs.isNotEmpty) {
+                    print("outputs arent liceat ad confossum");
+                    return;
+                  } else if (
+                    await Obstructionum.gladiatorConfodiantur(op2pm.obstructionum.interioreObstructionum.gladiator.input!.gladiatorId, op2pm.obstructionum.interioreObstructionum.producentis, dir)
+                  ) {
+                    print('clausus potest non oppugnare publica clavem');
+                    print("block can't attack the same public key");
+                    return;
+                  }
+                  Defensio turpiaDefensio = await Pera.turpiaGladiatoriaDefensione(index, gladiatorId, dir);
+                  List<Defensio> deschefLiber = await Pera.maximeDefensiones(true, index, gladiatorId, dir);
+                  List<Defensio> deschefFixum = await Pera.maximeDefensiones(false, index, gladiatorId, dir);
+                  List<String> defensionesLiber = deschefLiber.map((x) => x.defensio).toList();
+                  List<String> defensionesFixum = deschefFixum.map((x) => x.defensio).toList();
+                  List<String> defensiones = [];
+                  defensiones.add(turpiaDefensio.defensio);
+                  defensiones.addAll(defensionesLiber);
+                  defensiones.addAll(defensionesFixum);
+                  bool coschon =  false;
+                  for (int i = 0; i < defensiones.length; i++) {
+                      if (op2pm.obstructionum.probationem.contains(defensiones[i])) {
+                        coschon = true;
+                      } else {
+                        coschon = false;
+                        break;
+                      }
+                  }
+                  if (!coschon) {
+                    print('gladiator non defeaten');
+                    return;
+                  }
+                  int ardet = 0;
+                  for (GladiatorOutput output in obs.interioreObstructionum.gladiator.outputs) {
+                    for (String propter in output.rationem.map((x) => x.interioreRationem.publicaClavis)) {
+                      final balance = await Pera.statera(true, propter, dir);
+                      if (balance > BigInt.zero) {
+                        ardet += 1;
+                      }
+                    }
+                  }
+                  if (op2pm.obstructionum.interioreObstructionum.liberTransactions.where((liber) => liber.probationem == Constantes.ardeat).length != ardet) {
+                    print("Insufficiens ardet");
+                    return;
+                  }
+                  if (op2pm.obstructionum.interioreObstructionum.liberTransactions.where((liber) => liber.probationem == Constantes.transform).length != 1) {
+                    print("Insufficiens transforms");
+                    return;
+                  }
+                  Obstructionum utCognoscereObstructionum = obss.singleWhere((o) => o.interioreObstructionum.gladiator.id == op2pm.obstructionum.interioreObstructionum.gladiator.input!.gladiatorId);
+                  GladiatorOutput utCognoscere = utCognoscereObstructionum.interioreObstructionum.gladiator.outputs[op2pm.obstructionum.interioreObstructionum.gladiator.input!.index];
+                  if(
+                    !Utils.cognoscereVictusGladiator(
+                      PublicKey.fromHex(Pera.curve(), op2pm.obstructionum.interioreObstructionum.producentis), 
+                      Signature.fromASN1Hex(op2pm.obstructionum.interioreObstructionum.gladiator.input!.signature), 
+                      utCognoscere
+                    )) {
+                      print('invalidum confossus gladiator');
+                      print('invalid stabbed gladiator');
+                    }
                   if (!op2pm.obstructionum.probationem.startsWith('0' * (op2pm.obstructionum.interioreObstructionum.obstructionumDifficultas / 2).floor())) {
                     print('Insufficient leading zxeros');
                     return;
                   } else if (!op2pm.obstructionum.probationem.endsWith('0' * (op2pm.obstructionum.interioreObstructionum.obstructionumDifficultas / 2).floor())) {
                     print('Insufficient trailing zeros');
                     return;
-                  } else if (op2pm.obstructionum.interioreObstructionum.liberTransactions.where((liber) => liber.probationem == Constantes.txObstructionumPraemium).length != 1) {
+                  } else if (op2pm.obstructionum.interioreObstructionum.liberTransactions.where((liber) => liber.probationem == Constantes.txObstructionumPraemium).isNotEmpty) {
                     print("Insufficient obstructionum praemium");
                     return;
                   } else if (obs.interioreObstructionum.generare == Generare.EXPRESSI) {
                     print('non duo expressi cursus sustentabatur');
                     print('cannot produce two expressi blocks in a row');
+                    return;
+                  } else if (await Obstructionum.gladiatorConfodiantur(op2pm.obstructionum.interioreObstructionum.gladiator.input!.gladiatorId, op2pm.obstructionum.interioreObstructionum.producentis, dir)) {
+                    print('clausus potest non oppugnare publica clavem');
+                    print("block can't attack the same public key");
                     return;
                   }
                 }
@@ -451,7 +536,8 @@ class P2P {
                 if (isConfussusActive) {
                   confussusRp.sendPort.send("");
                 }
-                P2P.syncBlock(List<dynamic>.from([op2pm.obstructionum, sockets, dir]));
+
+                P2P.syncBlock(List<dynamic>.from([op2pm.obstructionum, sockets.length > 1 ? sockets.skip(sockets.indexOf('${client.address.address}:${client.port}')) : sockets, dir]));
                 // for (ReceivePort rp in efectusMiners) {
                 //
                 // }
@@ -467,17 +553,21 @@ class P2P {
                 client.write(json.encode(RequestObstructionumP2PMessage(summaNumerus, 'request-obstructionum').toJson()));
                 print('requested block $summaNumerus');
                 // await syncBlock(obs);
-              } else {
+              } else if(
+                op2pm.obstructionum.interioreObstructionum.obstructionumNumerus.length >= obs.interioreObstructionum.obstructionumNumerus.length  &&
+                op2pm.obstructionum.interioreObstructionum.obstructionumNumerus.last > obs.interioreObstructionum.obstructionumNumerus.last
+              )  {
                 await Utils.removeObstructionumsUntilProbationem(obs.probationem, dir);
+                print('remota obstructionum cum probationem ${obs.probationem}');
                 client.write(json.encode(RequestObstructionumProbationemP2PMessage(0, obs.probationem, 'request-obstructionum-probationem').toJson()));
-
-              }
-          }
+              } 
+            }
           }
         } else if (msg.type == 'request-probationem') {
-          RequestProbationemP2PMessage rpp2p = RequestProbationemP2PMessage.fromJson(json.decode(String.fromCharCodes(data).trim()));
-          String prior = await Utils.priorObstructionumIndex(rpp2p.index, dir);
-          client.write(json.encode(RequestObstructionumProbationemP2PMessage(rpp2p.index + 1, prior, 'request-obstructionum-probationem')));
+          RequestProbationemP2PMessage rpp2pm = RequestProbationemP2PMessage.fromJson(json.decode(String.fromCharCodes(data).trim()));
+          String prior = await Utils.priorObstructionumIndex(rpp2pm.index, dir);
+          int index = rpp2pm.index + 1;
+          client.write(json.encode(RequestObstructionumProbationemP2PMessage(index, prior, 'request-obstructionum-probationem').toJson()));
         }
       });
     });
@@ -615,6 +705,7 @@ class P2P {
         } else if (p2pm.type == 'request-obstructionum-probationem') {
           RequestObstructionumProbationemP2PMessage ropp2pm = RequestObstructionumProbationemP2PMessage.fromJson(json.decode(String.fromCharCodes(data).trim())); 
           print('recieved probationem ${ropp2pm.probationem}');
+          print('obstructionums post ${ropp2pm.index}');
           Obstructionum? obst = await Utils.accipereObstructionumPriorProbationem(ropp2pm.probationem, dir);
           if (obst == null) {
             soschock.write(json.encode(RequestProbationemP2PMessage(ropp2pm.index, 'request-probationem').toJson()));

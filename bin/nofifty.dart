@@ -65,7 +65,6 @@ void main(List<String> arguments) async {
         highestBlock.add(Constantes.maximeCaudicesFile);
       }
     }
-    print(p2pPortus);
 
     P2P p2p = P2P(int.parse(maxPares), principalisDirectory, [0]);
     p2p.listen(internum_ip, int.parse(p2pPortus));
@@ -507,7 +506,7 @@ void main(List<String> arguments) async {
             p2p.syncBlocks.add(await Isolate.spawn(P2P.syncBlock, List<dynamic>.from([obstructionum, p2p.sockets, principalisDirectory])));
             await obstructionum.salvare(principalisDirectory);
             p2p.expressieTxs = [];
-            p2p.efectusRp.sendPort.send("update miner");
+            // p2p.efectusRp.sendPort.send("update miner");
             if (p2p.isConfussusActive) {
               p2p.confussusRp.sendPort.send('update miner');
             }
@@ -672,7 +671,7 @@ void main(List<String> arguments) async {
         fixumDifficultas: Obstructionum.accipereFixumDifficultas(priorObstructionum),
         producentis: publicaClavis,
         priorProbationem: priorObstructionum.probationem,
-        gladiator: Gladiator(GladiatorInput(conf.index, Utils.signum(PrivateKey.fromHex(Pera.curve(), conf.privateKey), gladiatorToAttack), conf.gladiatorId), [], Utils.randomHex(32)),
+        gladiator: Gladiator(GladiatorInput(conf.index, Utils.signum(PrivateKey.fromHex(Pera.curve(), conf.privateKey), gladiatorToAttack.outputs[conf.index]), conf.gladiatorId), [], Utils.randomHex(32)),
         liberTransactions: liberTxs,
         fixumTransactions: fixumTxs,
         expressiTransactions: [],
@@ -731,6 +730,9 @@ void main(List<String> arguments) async {
     List<Isolate> expressiThreads = [];
     List<Isolate> syncExpressiBlocks = [];
     bool isExpressi = false;
+    String gladiatorExpressiId = "";
+    int gladiatorExpressiIndex = 0;
+    String gladiatorExpressiPrivateKey = "";
     p2p.expressiRp.listen((data) async {
       print('expressirptriggered');
       if(data ==  false) {
@@ -738,16 +740,36 @@ void main(List<String> arguments) async {
         expressiThreads.forEach((e) => e.kill(priority: Isolate.immediate));
         return;
       }
+      
       isExpressi = true;
       Obstructionum priorObstructionum = await Utils.priorObstructionumEfectus(principalisDirectory);
       ReceivePort acciperePortus = ReceivePort();
-      List<Propter> propters = [];
-      propters.addAll(Gladiator.grab(priorObstructionum.interioreObstructionum.propterDifficultas, p2p.propters));
+      // List<Propter> propters = [];
+      // propters.addAll(Gladiator.grab(priorObstructionum.interioreObstructionum.propterDifficultas, p2p.propters));
       List<Transaction> fixumTxs = [];
       fixumTxs.addAll(Transaction.grab(priorObstructionum.interioreObstructionum.fixumDifficultas, p2p.fixumTxs));
       final obstructionumDifficultas = await Obstructionum.utDifficultas(principalisDirectory);
       final List<Transaction> liberTxs = [];
       liberTxs.addAll(priorObstructionum.interioreObstructionum.expressiTransactions);
+      // List<Propter> propters = [];
+      // propters.addAll(Gladiator.grab(priorObstructionum.interioreObstructionum.propterDifficultas, p2p.propters));
+      liberTxs.addAll(priorObstructionum.interioreObstructionum.expressiTransactions);
+      Gladiator gladiatorToAttack = await Obstructionum.grabGladiator(gladiatorExpressiId, principalisDirectory);
+      for (String acc in gladiatorToAttack.outputs[gladiatorExpressiIndex].rationem.map((e) => e.interioreRationem.publicaClavis)) {
+        final balance = await Pera.statera(true, acc, principalisDirectory);
+        if (balance > BigInt.zero) {
+          liberTxs.add(Transaction.burn(await Pera.ardeat(PrivateKey.fromHex(Pera.curve(), gladiatorExpressiPrivateKey), acc, priorObstructionum.probationem, balance, principalisDirectory)));
+        }
+      }
+      Tuple2<InterioreTransaction, InterioreTransaction> transform = await Pera.transformFixum(gladiatorExpressiPrivateKey, principalisDirectory);
+      liberTxs.add(Transaction(Constantes.transform, transform.item1));
+      fixumTxs.addAll(p2p.fixumTxs);
+      fixumTxs.add(Transaction(Constantes.transform, transform.item2));
+      List<Defensio> deschef = await Pera.maximeDefensiones(true, gladiatorExpressiIndex, gladiatorExpressiId, principalisDirectory);
+      deschef.addAll(await Pera.maximeDefensiones(false, gladiatorExpressiIndex, gladiatorExpressiId, principalisDirectory));
+      List<String> toCrack = deschef.map((e) => e.defensio).toList();
+      final base = await Pera.turpiaGladiatoriaDefensione(gladiatorExpressiIndex, gladiatorExpressiId, principalisDirectory);
+      toCrack.add(base.defensio);
       List<Isolate> newThreads = [];
       for (int i = 0; i < expressiThreads.length; i++) {
         expressiThreads[i].kill();
@@ -762,12 +784,12 @@ void main(List<String> arguments) async {
             obstructionumNumerus: await Obstructionum.utObstructionumNumerus(principalisDirectory),
             producentis: publicaClavis,
             priorProbationem: priorObstructionum.probationem,
-            gladiator: Gladiator(null, [GladiatorOutput(propters.take((propters.length / 2).round()).toList()), GladiatorOutput(propters.skip((propters.length / 2).round()).toList())], Utils.randomHex(32)),
+            gladiator: Gladiator(GladiatorInput(gladiatorIndex, Utils.signum(PrivateKey.fromHex(Pera.curve(), gladiatorExpressiPrivateKey), gladiatorToAttack.outputs[gladiatorExpressiIndex]), gladiatorId), [], Utils.randomHex(32)),
             liberTransactions: liberTxs,
             fixumTransactions: fixumTxs,
             expressiTransactions: []
         );
-        newThreads.add(await Isolate.spawn(Obstructionum.expressi, List<dynamic>.from([interiore, acciperePortus.sendPort])));
+        newThreads.add(await Isolate.spawn(Obstructionum.expressi, List<dynamic>.from([interiore, toCrack, acciperePortus.sendPort])));
         if (i == efectusThreads.length) {
             newThreads.forEach(efectusThreads.add);
         }
@@ -798,6 +820,7 @@ void main(List<String> arguments) async {
         });
       }
     });
+    
     app.post('/mine-expressi', (Request request) async {
       if (!File('${principalisDirectory.path}/${Constantes.fileNomen}0.txt').existsSync()) {
         return Response.ok(json.encode({
@@ -807,13 +830,49 @@ void main(List<String> arguments) async {
       p2p.isExpressiActive = true;
       Obstructionum priorObstructionum = await Utils.priorObstructionumEfectus(principalisDirectory);
       ReceivePort acciperePortus = ReceivePort();
-      List<Propter> propters = [];
-      propters.addAll(Gladiator.grab(priorObstructionum.interioreObstructionum.propterDifficultas, p2p.propters));
+      // List<Propter> propters = [];
+      // propters.addAll(Gladiator.grab(priorObstructionum.interioreObstructionum.propterDifficultas, p2p.propters));
       List<Transaction> fixumTxs = [];
       fixumTxs.addAll(Transaction.grab(priorObstructionum.interioreObstructionum.fixumDifficultas, p2p.fixumTxs));
       final obstructionumDifficultas = await Obstructionum.utDifficultas(principalisDirectory);
       final List<Transaction> liberTxs = [];
       liberTxs.addAll(priorObstructionum.interioreObstructionum.expressiTransactions);
+      Confussus conf = Confussus.fromJson(json.decode(await request.readAsString()));
+      Gladiator gladiatorToAttack = await Obstructionum.grabGladiator(conf.gladiatorId, principalisDirectory);
+      if (!await Obstructionum.gladiatorSpiritus(conf.index, gladiatorToAttack.id, principalisDirectory)) {
+        return Response.forbidden(json.encode({
+          "code": 0,
+          "message": "Gladiator non inveni",
+          "english": "Gladiator not found"
+        }));
+      }
+      PrivateKey pk = PrivateKey.fromHex(Pera.curve(), conf.privateKey);
+      print(await Obstructionum.gladiatorConfodiantur(conf.gladiatorId, pk.publicKey.toHex(), principalisDirectory));
+      if (await Obstructionum.gladiatorConfodiantur(conf.gladiatorId, pk.publicKey.toHex(), principalisDirectory)) {
+        return Response.forbidden(json.encode({
+          "code": 0,
+          "message": "Non te oppugnare",
+          "english": "Can not attack yourself"
+        }));
+      }
+      gladiatorExpressiId = gladiatorToAttack.id;
+      gladiatorExpressiIndex = 0;
+      gladiatorExpressiPrivateKey = conf.privateKey;
+      for (String acc in gladiatorToAttack.outputs[conf.index].rationem.map((e) => e.interioreRationem.publicaClavis)) {
+        final balance = await Pera.statera(true, acc, principalisDirectory);
+        if (balance > BigInt.zero) {
+          liberTxs.add(Transaction.burn(await Pera.ardeat(PrivateKey.fromHex(Pera.curve(), conf.privateKey), acc, priorObstructionum.probationem, balance, principalisDirectory)));
+        }
+      }
+      Tuple2<InterioreTransaction, InterioreTransaction> transform = await Pera.transformFixum(conf.privateKey, principalisDirectory);
+      liberTxs.add(Transaction(Constantes.transform, transform.item1));
+      fixumTxs.addAll(p2p.fixumTxs);
+      fixumTxs.add(Transaction(Constantes.transform, transform.item2));
+      List<Defensio> deschef = await Pera.maximeDefensiones(true, conf.index, gladiatorToAttack.id, principalisDirectory);
+      deschef.addAll(await Pera.maximeDefensiones(false, conf.index, gladiatorToAttack.id, principalisDirectory));
+      List<String> toCrack = deschef.map((e) => e.defensio).toList();
+      final base = await Pera.turpiaGladiatoriaDefensione(conf.index, gladiatorToAttack.id, principalisDirectory);
+      toCrack.add(base.defensio);
       InterioreObstructionum interiore = InterioreObstructionum.expressi(
           obstructionumDifficultas: obstructionumDifficultas.length,
           forumCap: await Obstructionum.accipereForumCap(principalisDirectory),
@@ -824,12 +883,12 @@ void main(List<String> arguments) async {
           obstructionumNumerus: await Obstructionum.utObstructionumNumerus(principalisDirectory),
           producentis: publicaClavis,
           priorProbationem: priorObstructionum.probationem,
-          gladiator: Gladiator(null, [GladiatorOutput(propters.take((propters.length / 2).round()).toList()), GladiatorOutput(propters.skip((propters.length / 2).round()).toList())], Utils.randomHex(32)),
+          gladiator: Gladiator(GladiatorInput(conf.index, Utils.signum(PrivateKey.fromHex(Pera.curve(), conf.privateKey), gladiatorToAttack.outputs[conf.index]), conf.gladiatorId), [], Utils.randomHex(32)),
           liberTransactions: liberTxs,
           fixumTransactions: fixumTxs,
           expressiTransactions: []
       );
-      expressiThreads.add(await Isolate.spawn(Obstructionum.expressi, List<dynamic>.from([interiore, acciperePortus.sendPort])));
+      expressiThreads.add(await Isolate.spawn(Obstructionum.expressi, List<dynamic>.from([interiore, toCrack, acciperePortus.sendPort])));
       acciperePortus.listen((nuntius) async {
         Obstructionum obstructionum = nuntius;
         Obstructionum priorObs = await Utils.priorObstructionum(principalisDirectory);

@@ -6,6 +6,7 @@ import 'package:nofifty/obstructionum.dart';
 import 'package:elliptic/elliptic.dart';
 import 'package:nofifty/transaction.dart';
 import 'package:ecdsa/ecdsa.dart';
+import 'package:nofifty/gladiator.dart';
 import 'package:nofifty/constantes.dart';
 import 'package:nofifty/errors.dart';
 class Utils {
@@ -36,7 +37,8 @@ class Utils {
   }
   static String signum(PrivateKey privateKey, dynamic output) => signature(privateKey, utf8.encode(json.encode(output.toJson()))).toASN1Hex();
 
-
+  static bool cognoscereVictusGladiator(PublicKey publicaClavis, Signature signature, GladiatorOutput gladiatorOutput) => 
+      verify(publicaClavis, utf8.encode(json.encode(gladiatorOutput.toJson())), signature);
   static bool cognoscere(PublicKey publicaClavis, Signature signature, TransactionOutput txOutput) =>
       verify(publicaClavis, utf8.encode(json.encode(txOutput.toJson())), signature);
 
@@ -81,7 +83,9 @@ class Utils {
     print('fails here');
     File file = File('${directory.path}/${Constantes.fileNomen}${obs.interioreObstructionum.obstructionumNumerus.length-1}.txt');
     final lines = await Utils.fileAmnis(file).toList();
-    lines.removeRange(obs.interioreObstructionum.obstructionumNumerus.last, lines.length); 
+    if(obs.interioreObstructionum.obstructionumNumerus.last > 0) {  
+      lines.removeRange(obs.interioreObstructionum.obstructionumNumerus.last, lines.length); 
+    }
     print('lines');
     file.writeAsStringSync('');
     var sink = file.openWrite(mode: FileMode.append);

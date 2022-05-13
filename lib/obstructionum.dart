@@ -233,15 +233,32 @@ class Obstructionum {
   }
   static Future expressi(List<dynamic> args) async {
     InterioreObstructionum interioreObstructionum = args[0];
-    SendPort mitte = args[1];
+    List<String> toCrack = args[1];
+    SendPort mitte = args[2];
     String probationem = '';
-    do {
-      interioreObstructionum.mine();
-      probationem = HEX.encode(sha512.convert(utf8.encode(json.encode(interioreObstructionum.toJson()))).bytes);
-    } while (
-      !probationem.startsWith('0' * (interioreObstructionum.obstructionumDifficultas  / 2).floor()) ||
-      !probationem.endsWith('0' * (interioreObstructionum.obstructionumDifficultas  / 2).floor())
-    );
+    bool doschoes = false;
+    while(true) {
+      do {
+        interioreObstructionum.mine();
+        probationem = HEX.encode(sha512.convert(utf8.encode(json.encode(interioreObstructionum.toJson()))).bytes);
+      } while (
+        !probationem.startsWith('0' * (interioreObstructionum.obstructionumDifficultas  / 2).floor()) ||
+        !probationem.endsWith('0' * (interioreObstructionum.obstructionumDifficultas  / 2).floor())
+      );
+      for (int i = 0; i < toCrack.length; i++) {
+          if (probationem.contains(toCrack[i])) {
+            doschoes = true;
+          } else {
+            doschoes = false;
+            break;
+          }
+      }
+      if (doschoes) {
+        break;
+      } else {
+        continue;
+      }
+    }
     mitte.send(Obstructionum(interioreObstructionum, probationem));
   }
   Map<String ,dynamic> toJson() => {
@@ -328,6 +345,12 @@ class Obstructionum {
         return false;
       }
       return true;
+  }
+  static Future<bool> gladiatorConfodiantur(String gladiatorId, String publicaClavis, Directory dir) async {
+    List<Obstructionum> obs = await getBlocks(dir);
+    Obstructionum obsGladiator = obs.singleWhere((element) => element.interioreObstructionum.gladiator.id == gladiatorId);
+    Gladiator gladiator = obsGladiator.interioreObstructionum.gladiator;
+    return gladiator.outputs.any((o) => o.rationem.any((r) => r.interioreRationem.publicaClavis == publicaClavis));
   }
   static Future<Gladiator> grabGladiator(String gladiatorId, Directory dir) async {
     List<Obstructionum> obs = await getBlocks(dir);
